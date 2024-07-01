@@ -1,5 +1,25 @@
-/* stylelint-disable */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-/* stylelint-enable */
+/* stylelint-disable color-function-notation */
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+}
+
+@keyframes circle-animation-keyframes {
+  0% {
+    transform: scale(0);
+    border-radius: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    border-radius: 50%;
+  }
+}
+
+.circle-animation {
+  animation: circle-animation-keyframes 0.5s ease-in-out;
+}
