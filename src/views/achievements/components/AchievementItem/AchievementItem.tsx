@@ -10,6 +10,8 @@ export interface AchievementItemProps {
   dateAchieved: string;
   description: string;
   title: string;
+  temperature?: string;
+  humidity?: string;
   onRequestEdit?: (id: string) => void;
 }
 
@@ -19,6 +21,8 @@ export function AchievementItem({
   title,
   id,
   onRequestEdit,
+  humidity,
+  temperature,
 }: AchievementItemProps) {
   const [isOpenComfirm, setIsOpenComfirm] = useState(false);
 
@@ -49,7 +53,8 @@ export function AchievementItem({
         </div>
       )}
       <div className="flex items-center">
-        <time className="text-gray-400 text-sm ">{date}</time>
+        <time className="text-gray-500 text-sm ">{date}</time>
+
         <DropdownMenu.Root>
           <DropdownMenu.Trigger className="ml-auto" asChild>
             <IconButton>
@@ -75,7 +80,19 @@ export function AchievementItem({
           </DropdownMenu.Content>
         </DropdownMenu.Root>
       </div>
-      <h3 className="text-lg font-bold">{title}</h3>
+      {(temperature || humidity) && (
+        <div className="text-gray-500 text-sm mb-2 flex items-center gap-1">
+          {temperature && (
+            <span className="text-gray-500">Temperature: {temperature}°C</span>
+          )}
+          {humidity && (
+            <span className="text-gray-500 ml-2">Humidity: {humidity}%</span>
+          )}
+        </div>
+      )}
+      <div className="flex items-start">
+        <h3 className="text-lg font-bold">{title}</h3>
+      </div>
       <p className="text mt-1">{description}</p>
 
       {isOpenComfirm && (

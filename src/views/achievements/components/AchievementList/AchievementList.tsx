@@ -66,7 +66,7 @@ export function AchievementList({
     dispatch(
       setFilter({
         search: filter.search,
-        sortDate: e.target.value as "asc" | "desc",
+        sortDate: (e.target.value as "asc" | "desc") || undefined,
       }),
     );
   }
@@ -96,7 +96,7 @@ export function AchievementList({
             onChange={handleChangeSortDate}
             className="ml-2 w-[120px] bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2.5"
           >
-            <option>Sort</option>
+            <option value="">Sort</option>
             <option value="asc">Date ASC</option>
             <option value="desc">Date DESC</option>
           </select>
@@ -121,6 +121,8 @@ export function AchievementList({
                 dateAchieved={achievement.dateAchieved}
                 description={achievement.description}
                 title={achievement.title}
+                humidity={achievement.humidity}
+                temperature={achievement.temperature}
                 onRequestEdit={handleEdit}
               />
             ))}

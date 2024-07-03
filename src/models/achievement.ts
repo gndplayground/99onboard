@@ -3,4 +3,6 @@ export interface Achievement {
   dateAchieved: string;
   description: string;
   title: string;
+  temperature?: string;
+  humidity?: string;
 }

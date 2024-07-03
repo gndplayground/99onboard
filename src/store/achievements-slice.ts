@@ -3,6 +3,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { store } from "@store";
+import { apiCall } from "src/utils";
 
 const getAchievements = (): Achievement[] =>
   JSON.parse(localStorage.getItem("achievements") || "[]");
@@ -12,6 +13,32 @@ const saveAchievements = (achievements: Achievement[]) =>
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function formatDateForApi(date: string) {
+  const dateObjec = new Date(date);
+  // Change to timezone of Singapore
+  dateObjec.setHours(dateObjec.getHours() + 8);
+
+  // 2022-11-22T02:02:00.000Z
+  // need to remove the .000Z
+  return dateObjec.toISOString().split(".")[0];
+}
+
+function fetchTemperature(date: string) {
+  const url = `https://api.data.gov.sg/v1/environment/air-temperature?date_time=${formatDateForApi(date)}`;
+
+  return apiCall<{ items: { readings: { value: string }[] }[] }>({
+    url,
+  });
+}
+
+function fetchHumidity(date: string) {
+  const url = `https://api.data.gov.sg/v1/environment/relative-humidity?date_time=${formatDateForApi(date)}`;
+
+  return apiCall<{ items: { readings: { value: string }[] }[] }>({
+    url,
+  });
 }
 
 interface AchievementState {
@@ -108,6 +135,25 @@ export const achievementsApi = createApi({
         const fullAchievement = { ...newAchievement, id: newId } as Achievement;
         const updatedAchievements = [...achievements, fullAchievement];
 
+        try {
+          const [humidity, temperature] = await Promise.allSettled([
+            fetchHumidity(fullAchievement.dateAchieved),
+            fetchTemperature(fullAchievement.dateAchieved),
+          ]);
+
+          if (humidity.status === "fulfilled") {
+            fullAchievement.humidity =
+              humidity.value.items[0].readings[0].value;
+          }
+
+          if (temperature.status === "fulfilled") {
+            fullAchievement.temperature =
+              temperature.value.items[0].readings[0].value;
+          }
+        } catch (error) {
+          // Ignore error
+        }
+
         saveAchievements(updatedAchievements);
 
         return { data: fullAchievement };
@@ -115,16 +161,20 @@ export const achievementsApi = createApi({
       invalidatesTags: ["Achievement"],
     }),
 
-    updateAchievement: builder.mutation<Achievement, Achievement>({
+    updateAchievement: builder.mutation<Achievement, Partial<Achievement>>({
       queryFn: async (updatedAchievement) => {
         await sleep(2000);
         const achievements = getAchievements();
         const index = achievements.findIndex(
           (ach) => ach.id === updatedAchievement.id,
         );
-        achievements[index] = updatedAchievement;
+        const newAchievement = {
+          ...achievements[index],
+          ...updatedAchievement,
+        };
+        achievements[index] = newAchievement;
         saveAchievements(achievements);
-        return { data: updatedAchievement };
+        return { data: newAchievement };
       },
 
       onQueryStarted: (
@@ -144,7 +194,12 @@ export const achievementsApi = createApi({
               const index = draftAchievements.findIndex(
                 (ach) => ach.id === updatedAchievement.id,
               );
-              if (index !== -1) draftAchievements[index] = updatedAchievement;
+              const currentAchievement = draftAchievements[index];
+              const newAchievement = {
+                ...currentAchievement,
+                ...updatedAchievement,
+              };
+              if (index !== -1) draftAchievements[index] = newAchievement;
             },
           ),
         );
