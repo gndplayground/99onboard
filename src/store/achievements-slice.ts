@@ -56,7 +56,7 @@ export const achievementsApi = createApi({
     >({
       queryFn: async ({ search, sortDate }) => {
         let achievements = getAchievements();
-
+        console.log("Fetching achievements");
         await sleep(3000);
         if (search) {
           achievements = achievements.filter(

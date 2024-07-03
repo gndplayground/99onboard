@@ -2,6 +2,8 @@ import { IconButton } from "@components";
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useDeleteAchievementMutation } from "@store/achievements-slice";
+import { DialogConfirmDelete } from "../DialogConfirmDelete";
+import { useState } from "react";
 
 export interface AchievementItemProps {
   id: string;
@@ -18,6 +20,8 @@ export function AchievementItem({
   id,
   onRequestEdit,
 }: AchievementItemProps) {
+  const [isOpenComfirm, setIsOpenComfirm] = useState(false);
+
   const date = new Date(dateAchieved).toLocaleDateString("en-SG", {
     year: "numeric",
     month: "numeric",
@@ -61,8 +65,10 @@ export function AchievementItem({
               Edit
             </DropdownMenu.Item>
             <DropdownMenu.Item
-              className="text-red-500 py-2 px-1  cursor-pointer"
-              onClick={handleDelete}
+              className="text-red-500 py-2 px-1 cursor-pointer"
+              onClick={() => {
+                setIsOpenComfirm(true);
+              }}
             >
               Delete
             </DropdownMenu.Item>
@@ -71,6 +77,14 @@ export function AchievementItem({
       </div>
       <h3 className="text-lg font-bold">{title}</h3>
       <p className="text mt-1">{description}</p>
+
+      {isOpenComfirm && (
+        <DialogConfirmDelete
+          onConfirm={handleDelete}
+          open={isOpenComfirm}
+          onOpenChange={setIsOpenComfirm}
+        />
+      )}
     </div>
   );
 }

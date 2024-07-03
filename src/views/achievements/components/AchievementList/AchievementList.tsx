@@ -9,6 +9,7 @@ import { AchievementItemSkeleton } from "../AchievementItemSkeleton";
 import { useAppDispatch, useAppSelector } from "@hooks";
 import { RootState } from "@store";
 import { shallowEqual } from "react-redux";
+import { useDebounce } from "use-debounce";
 
 interface AchievementListProps {
   onRequestCreate?: () => void;
@@ -30,13 +31,16 @@ export function AchievementList({
     equalityFn: shallowEqual,
   });
 
+  const [searchTerm] = useDebounce(filter.search, 700);
+
   const {
     data: achievements,
+    currentData,
     isLoading,
     isFetching,
   } = useGetAchievementsQuery(
     {
-      search: filter.search,
+      search: searchTerm,
       sortDate: filter.sortDate,
     },
     {
@@ -99,7 +103,7 @@ export function AchievementList({
         </div>
 
         <div className="mt-6 flex flex-col gap-6 relative">
-          {isFetching && !isLoading && (
+          {isFetching && !isLoading && !currentData && (
             <div className="h-1 w-full bg-blue-100 overflow-hidden absolute -top-2 left-0">
               <div className="progress w-full h-full bg-blue-500 left-right"></div>
             </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
 export interface LocalButtonProps {
   variant?: string;
@@ -13,13 +13,10 @@ export interface ButtonProps
     >,
     LocalButtonProps {}
 
-export const Button: React.FC<ButtonProps> = ({
-  href,
-  children,
-  className,
-  loading,
-  ...others
-}) => {
+export const Button = forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  ButtonProps
+>(({ href, children, className, loading, ...others }, ref) => {
   const tag = href ? "a" : "button";
 
   const baseStyle =
@@ -33,6 +30,7 @@ export const Button: React.FC<ButtonProps> = ({
     {
       className: `${baseStyle} ${hoverStyle} ${className}`,
       href,
+      ref,
       ...others,
     },
     <div className="flex items-center">
@@ -58,4 +56,4 @@ export const Button: React.FC<ButtonProps> = ({
       )}
     </div>,
   );
-};
+});
